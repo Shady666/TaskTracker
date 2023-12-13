@@ -1,0 +1,39 @@
+version: '3.8'
+services:
+  task-app:
+    build: ./
+    ports:
+      - "3000:3000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: on-failure
+    depends_on:
+      - db-postgres
+    env_file: .env
+    environment:
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      DB_HOST: ${DB_HOST}
+      WAIT_HOSTS: db-postgres:5432
+    networks:
+      - fullstack
+
+  db-postgres:
+    restart: always
+    image: postgres:latest
+    volumes:
+      - ./.database/postgres/data:/var/lib/postgresql/data
+    env_file: .env
+    environment:
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    ports:
+      - "5432:5432"
+    networks:
+        - fullstack
+
+volumes:
+  database_mysql:
+networks:
+  fullstack:
+    driver: bridge
